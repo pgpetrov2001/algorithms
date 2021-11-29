@@ -4,7 +4,7 @@
 #include <cstdint>
 using std::vector;
 
-template<typename S_int=uint64_t, S_int U=((1ll<<32)-5)>
+template<typename S_int, S_int U>
 class HashSet {
     private:
         //the integral type S_int must have
@@ -32,13 +32,13 @@ class HashSet {
         static constexpr S_int p = prime_gte(U);
 
         //random generator
-        std::mt19937 gen;
-        std::uniform_int_distribution<S_int> distr;
-        int n;
-        S_int m, c;
-        vector<S_int> S, data, ci;
-        vector<vector<S_int>> Si; // Si = Hits(S, c, m, i)
+        std::mt19937 generator;
+        std::uniform_int_distribution<S_int> distribution;
+        int n, m; 
         vector<int> dataindi; // At which index is the hash array for box with hash i
+        S_int c;
+        vector<S_int> data, ci;
+        vector<vector<S_int>> Si; // Si = Hits(S, c, m, i)
 
         int h(S_int c, int m, S_int x) {
             return ((c*x)%p)%m;
@@ -47,7 +47,7 @@ class HashSet {
         S_int col(const vector<S_int>& Si, S_int c, int m) { //Col(S, m, c)
             int ni = Si.size();
             vector<int> hits(m, 0);
-            S_int ans = 0;
+            S_int ans = 0; // S*(S-1) <= U*(U-1) <= 2^x * (2^x - 1) < 2^2x, where 2x is sizeof(S_int)*8 
             for (S_int x : Si) {
                 ans += hits[h(c, m, x)];
                 hits[h(c, m, x)]++;
@@ -57,13 +57,13 @@ class HashSet {
 
     public:
         HashSet(const vector<S_int> &S) : 
-            S(S), n(S.size()), m(S.size()),
+            n(S.size()), m(S.size()),
             Si(S.size()), ci(S.size()), dataindi(S.size()),
-            distr(1, p-1) { 
+            distribution(1, p-1) { 
             //no gurantees for correctness when S contains an element >= U
             S_int guess_c;
             do {
-                guess_c = distr(gen);
+                guess_c = distribution(generator);
             } while (col(S, guess_c, m) > ((n*(n-1))/2)/m);
             c = guess_c;
 
@@ -75,7 +75,7 @@ class HashSet {
                 int ni = Si[i].size();
                 if (ni == 0) continue;
                 do {
-                    guess_c = distr(gen);
+                    guess_c = distribution(generator);
                 } while (col(Si[i], guess_c, ni*ni) > 0);
                 ci[i] = guess_c;
 
@@ -87,13 +87,13 @@ class HashSet {
             }
         }
 
-        bool query(S_int val) {
-            int i = h(c,m,val);
+        bool query(S_int key) {
+            int i = h(c, m, key);
             if (Si[i].empty()) {
                 return false;
             }
             int ni = Si[i].size();
-            int j = h(ci[i], ni*ni, val);
-            return data[dataindi[i] + j] == val;
+            int j = h(ci[i], ni*ni, key);
+            return data[dataindi[i] + j] == key;
         }
 };

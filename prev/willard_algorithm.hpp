@@ -1,10 +1,10 @@
-#include <utility>
 #include <cassert>
 #include <cstdint>
 #include <vector>
 #include <cmath>
+#include <utility>
+#include <optional>
 using std::vector;
-using std::pair;
 
 #include "../nocollision-hashmap/HashMap.hpp"
 
@@ -69,7 +69,7 @@ public:
         }
     }
 
-    pair<bool,S_int> query(S_int x) {
+    std::optional<S_int> query(S_int x) {
         int exists_level = 0, notexists_level = LOGU+1;
         while (exists_level+1 < notexists_level) {
             int mid_level    = (exists_level + notexists_level) / 2;
@@ -82,7 +82,7 @@ public:
             }
         }
         if (exists_level == LOGU) {
-            return {true, x};
+            return x;
         }
         auto prefix      = (x >> (LOGU - notexists_level)) ^ 1;
         auto bit         = prefix & 1;
@@ -90,11 +90,11 @@ public:
         if (bit == 1) {
             auto [_, leaf] = trie_level[LOGU].query(min[vertex]);
             if (prev[leaf] == U) { // this means it has no previous element in the set
-                return {false, S_int()};
+                return {};
             }
-            return {true, prev[leaf]};
+            return prev[leaf];
         } 
-        return {true, max[vertex]};
+        return max[vertex];
     }
 
 private:

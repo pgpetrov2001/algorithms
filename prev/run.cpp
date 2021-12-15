@@ -26,9 +26,9 @@ int main() {
     while (q--) {
         S_int x;
         cin >> x;
-        auto [defined, result] = tree.query(x);
-        if (defined) {
-            cout << result;
+        auto result = tree.query(x);
+        if (result) {
+            cout << *result;
         } else {
             cout << "undefined";
         }

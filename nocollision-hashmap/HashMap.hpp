@@ -36,7 +36,7 @@ class HashMap {
         //random generator
         std::mt19937 generator;
         std::uniform_int_distribution<S_int> distribution;
-        int n, m;
+        const int n, m;
         vector<int> dataindi; // At which index is the hash array for box with hash i
         S_int c;
         vector<S_int> ci, key_data;

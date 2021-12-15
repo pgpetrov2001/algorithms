@@ -80,7 +80,7 @@ class HashSet {
                 ci[i] = guess_c;
 
                 dataindi[i] = data.size();
-                data.resize(data.size() + ni*ni, -1);
+                data.resize(data.size() + ni*ni, U);
                 for (S_int x : Si[i]) {
                     data[dataindi[i] + h(ci[i], ni*ni, x)] = x;
                 }

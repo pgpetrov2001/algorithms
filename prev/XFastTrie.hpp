@@ -6,6 +6,9 @@
 #include <optional>
 using std::vector;
 
+#include <iostream>
+using std::cout; using std::endl;
+
 #include "../nocollision-hashmap/HashMap.hpp"
 
 //TODO: add copy constructors to all classes
@@ -19,9 +22,10 @@ private:
     vector<int> max = {0};
     vector<int> min = {0};
     vector<int> prev = {0};
+    vector<S_int> S;
 
 public:
-    XFastTrie(const vector<S_int> &S) {
+    XFastTrie(const vector<S_int> &S) : S(S) {
         vector<int> trie[2] = {{0},{0}};
         vector<S_int> prefix_of = {0};
         //trie[bit][v] is vertex that branches with bit from v
@@ -46,7 +50,7 @@ public:
                 } 
                 v = trie[bit][v];
                 max[v] = max[v] == -1? i: S[max[v]] < x? i: max[v];
-                min[v] = min[v] == -1? i: S[min[v]] < x? i: min[v];
+                min[v] = min[v] == -1? i: S[min[v]] > x? i: min[v];
                 prefix_of[v] = prefix;
             }
         }
@@ -70,10 +74,8 @@ public:
             vector<pair<S_int, int>> trie_level_keyval;
             trie_level_keyval.reserve(trie_level_vertices[level].size());
             for (auto v : trie_level_vertices[level]) {
-                /* cout << v << " " << bitset<23>(prefix_of[v]) << " " << bitset<23>(max[v]) << endl; */
                 trie_level_keyval.push_back({prefix_of[v], v});
             }
-            /* cout << "Creating hash level " << level << endl; */
             trie_level.push_back({trie_level_keyval});
         }
     }
@@ -90,7 +92,6 @@ public:
                 notexists_level = mid_level;
             }
         }
-        /* cout << exists_level << " " << notexists_level << endl; */
         if (exists_level == LOGU) {
             return max[*trie_level[LOGU].query(x)];
         }
@@ -98,7 +99,7 @@ public:
         auto bit    = prefix & 1;
         int vertex  = *trie_level[notexists_level].query(prefix);
         if (bit == 1) {
-            int leaf = *trie_level[LOGU].query(min[vertex]);
+            int leaf = *trie_level[LOGU].query(S[min[vertex]]);
             if (prev[leaf] == -1) { // this means it has no previous element in the set
                 return {};
             }

@@ -4,6 +4,9 @@
 #include <cstdint>
 using std::vector;
 
+#ifndef HASHSET
+#define HASHSET
+
 template<typename S_int, S_int U>
 class HashSet {
     private:
@@ -103,3 +106,5 @@ class HashSet {
             return data[dataindi[i] + j] == key;
         }
 };
+
+#endif

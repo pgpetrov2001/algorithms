@@ -4,6 +4,10 @@
 #include <random>
 #include <cstdint>
 #include <optional>
+
+#ifndef HASHMAP
+#define HASHMAP
+
 using std::vector;
 using std::pair;
 
@@ -123,3 +127,5 @@ class HashMap {
             return {};
         }
 };
+
+#endif

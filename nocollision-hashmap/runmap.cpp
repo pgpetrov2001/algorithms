@@ -41,9 +41,9 @@ int main() {
     while (q--) {
         uint64_t key;
         cin >> key;
-        auto [exists, val] = map->query(key);
-        if (exists) {
-            cout << val << endl;
+        auto result = map->query(key);
+        if (result.has_value()) {
+            cout << *result << endl;
         } else {
             cout << "undefined" << endl;
         }

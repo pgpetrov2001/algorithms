@@ -89,6 +89,9 @@ public:
                 notexists_level = mid_level;
             }
         }
+        if (exists_level == 0) {
+            return {};
+        }
         if (exists_level == LOGU) {
             return max[*trie_level[LOGU].query(x)];
         }

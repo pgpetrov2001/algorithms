@@ -65,6 +65,9 @@ class HashMap {
             n(keyval.size()), Si(keyval.size()), Vi(keyval.size()), 
             m(keyval.size()), ci(keyval.size()), dataindi(keyval.size()), distribution(1, p-1) { 
             //no gurantees for correctness when S contains an element >= U
+            if (keyval.empty()) {
+                return;
+            }
             vector<S_int> S;
             S.reserve(keyval.size());
             for (auto &[key, val] : keyval) {
@@ -105,6 +108,9 @@ class HashMap {
         }
 
         std::optional<Val> query(S_int key) {
+            if (Si.empty()) {
+                return {};
+            }
             int i = h(c, m, key);
             if (Si[i].empty()) {
                 return {};

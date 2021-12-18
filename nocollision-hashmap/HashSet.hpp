@@ -61,6 +61,9 @@ class HashSet {
             Si(S.size()), ci(S.size()), dataindi(S.size()),
             distribution(1, p-1) { 
             //no gurantees for correctness when S contains an element >= U
+            if (S.empty()) {
+                return;
+            }
             S_int guess_c;
             do {
                 guess_c = distribution(generator);
@@ -88,6 +91,9 @@ class HashSet {
         }
 
         bool query(S_int key) {
+            if (Si.empty()) {
+                return {};
+            }
             int i = h(c, m, key);
             if (Si[i].empty()) {
                 return false;

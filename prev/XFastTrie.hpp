@@ -10,6 +10,9 @@ using std::vector;
 
 //TODO: add copy constructors to all classes
 
+#ifndef XFASTTRIE
+#define XFASTTRIE
+
 template <typename S_int, S_int U>
 class XFastTrie {
 private:
@@ -108,3 +111,5 @@ public:
         return max[vertex];
     }
 };
+
+#endif

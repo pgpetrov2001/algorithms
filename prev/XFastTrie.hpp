@@ -90,7 +90,7 @@ public:
                 notexists_level = mid_level;
             }
         }
-        cout << exists_level << " " << notexists_level << endl;
+        /* cout << exists_level << " " << notexists_level << endl; */
         if (exists_level == LOGU) {
             return max[*trie_level[LOGU].query(x)];
         }

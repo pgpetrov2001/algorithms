@@ -6,9 +6,6 @@
 #include <optional>
 using std::vector;
 
-#include <iostream>
-using std::cout; using std::endl;
-
 #include "../nocollision-hashmap/HashMap.hpp"
 
 //TODO: add copy constructors to all classes

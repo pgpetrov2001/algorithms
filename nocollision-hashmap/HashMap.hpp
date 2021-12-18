@@ -3,6 +3,7 @@
 #include <vector>
 #include <random>
 #include <cstdint>
+#include <optional>
 using std::vector;
 using std::pair;
 
@@ -103,16 +104,16 @@ class HashMap {
             }
         }
 
-        pair<bool,Val> query(S_int key) {
+        std::optional<Val> query(S_int key) {
             int i = h(c, m, key);
             if (Si[i].empty()) {
-                return {false, Val()};
+                return {};
             }
             int ni = Si[i].size();
             int idx = dataindi[i] + h(ci[i], ni*ni, key);
             if (key_data[idx] == key) {
-                return {true, val_data[idx]};
+                return val_data[idx];
             }
-            return {false, Val()};
+            return {};
         }
 };

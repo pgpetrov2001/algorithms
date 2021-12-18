@@ -1,7 +1,7 @@
 #include <iostream>
 #include <vector>
 
-#include "willard_algorithm.hpp"
+#include "XFastTrie.hpp"
 
 using std::cin;
 using std::cout;
@@ -18,17 +18,17 @@ int main() {
         cin >> S[i];
     }
 
-    FusionTree<uint64_t, U> tree(S);
+    XFastTrie<uint64_t, U> tree(S);
 
     int q;
     cin >> q;
 
     while (q--) {
-        S_int x;
+        uint64_t x;
         cin >> x;
         auto result = tree.query(x);
-        if (result) {
-            cout << *result;
+        if (result.has_value()) {
+            cout << S[*result];
         } else {
             cout << "undefined";
         }

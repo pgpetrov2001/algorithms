@@ -44,14 +44,6 @@ int get_len(int q) {
 
 //to be able to get s_link of leaves we need to store additionally parent of every node
 
-int qn = 1;
-int n = 0;
-char word[MAXN];
-
-string_view get_str(int q) {
-    return {word + Q[q].pos, get_len(q)};
-}
-
 struct ImplicitState;
 
 ImplicitState follow_word(int q, int k, int pos) {
@@ -117,19 +109,25 @@ struct ImplicitState {
     }
 };
 
+int qn = 1;
+int n = 0;
+char word[MAXN];
 
 ImplicitState stem;
+
+string_view get_str(int q) {
+    return {word + Q[q].pos, get_len(q)};
+}
 
 void add_char(char c) {
     c -= 'a';
 
     int prev_stem = 0;
     while (stem && !follow_char(stem, c)) {
-        //new states
-        if (stem.k) {
-            int p = delta[stem.a][stem.q];
-            Q[qn] = {Q[p].pos, Q[q].len + stem.k}; // compute suffix link later
-            delta[stem.a][stem.q] = qn;
+        if (stem.k) { // make explicit state from implicit one
+            int p = delta(stem.q, stem.a);
+            Q[qn] = {Q[p].pos, Q[q].len + stem.k}; // assign suffix link at next iteration
+            delta(stem.q, stem.a) = qn;
             char a = word[Q[qn].pos + Q[qn].len];
             delta(qn, a) = p;
             if (prev_stem) {
@@ -140,19 +138,37 @@ void add_char(char c) {
         }
         //create destination state
         Q[qn] = {Q[stem.q].pos, Q[stem.q].len + 1};
-        delta[c][stem.q] = qn;
+        delta(stem.q, c) = qn;
         qn++;
 
         prev_stem = stem.q;
         stem = stem.get_s_link();
     }
 
+    //if the while did do an iteration
+    //then since stem was not a leaf and had a new transition added
+    //therefore the current stem has that other transition as well apart from the transition with c
+    //so the k of stem decreased during every iteration until it reached 0
     if (prev_stem) {
         Q[prev_stem].s_link = stem;
-        stem = ImplicitState{stem.q}.follow_char(c); // not a leaf because proper infix
     }
 
+    if (!stem) {
+        stem = {1};
+    }
+
+
+    stem = ImplicitState{stem.q}.follow_char(c); // not a leaf because proper infix
     word[n++] = c;
+}
+
+void init() {
+    qn = 1;
+    n = 0;
+    //create empty word
+    Q[qn] = {-1, 0}; // only it can be encountered before start of word
+    stem = {qn};
+    qn++;
 }
 
 int main() {

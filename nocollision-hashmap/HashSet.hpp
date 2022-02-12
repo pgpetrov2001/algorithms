@@ -73,9 +73,19 @@ class HashSet {
             } while (col(S, guess_c, m) > ((n*(n-1))/2)/m);
             c = guess_c;
 
+            //every pair x,y from S have only (p-1)/m guesses for c that cause it to be a collision
+            //therefore there exists a guess for c that causes at most (n*(n-1))/2 / m collisions
+            //otherwise if for all guesses for c the collisions were more, then the sum of collisions for all 
+            //guesses for c would be more than (n*(n-1))/2 * (p-1)/m which contradicts the first assertion
+
             for (S_int x : S) {
                 Si[h(c, m, x)].push_back(x);
             }
+
+            //for each Si we have ni*ni memory because (ni*(ni-1))/2 / (ni*ni) < 1/2, which means there will be no collisions inside Si
+            //sum of all (ni*(ni-1))/2 <= col(S,c,n) <= (n-1)/2
+            //sum of all (ni*ni) <= n-1 + n = 2*n - 1
+            //the sum of all ni*ni is <= 2*n because sum of all ni*ni / 2 <= n is the same as (ni*(ni-1))/2 <= n
 
             for (int i=0; i<m; ++i) {
                 int ni = Si[i].size();

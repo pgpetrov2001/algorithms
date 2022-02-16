@@ -2,6 +2,7 @@
 #include <string_view>
 #include <map>
 #include <vector>
+#include <cstring>
 
 using namespace std;
 
@@ -16,50 +17,21 @@ struct State {
 map<int, int> delta_[26];
 
 int &delta(int q, char a) {
+    a -= 'a';
     return delta_[a][q];
 }
 
 bool has_trans(int q, char a) {
+    a -= 'a';
     return delta_[a].count(q);
 }
 
 int count_trans(int q) {
     int ans = 0;
     for (char a=0; a<26; ++a) {
-        ans += delta_[a][q].size();
+        ans += delta_[a].count(q);
     }
     return ans;
-}
-
-int get_len(int q) {
-    if (count_trans(q) == 0) {
-        //contains data about the first state along the path from its parent to q
-        //this state is for a string that is encountered once as a proper infix (if it's different from q)
-        //and possibly once as a suffix, therefore pos is correct for q
-        //q is a suffix
-        return n - Q[q].pos;
-    }
-    return Q[q].pos;
-}
-
-//to be able to get s_link of leaves we need to store additionally parent of every node
-
-struct ImplicitState;
-
-ImplicitState follow_word(int q, int k, int pos) {
-    if (k == 0) { // covers additional case for leaves
-        return {q};
-    }
-    char a = word[pos];
-    if (has_trans(q, a)) {
-        return {0};
-    }
-    int p = delta(q, a);
-    int jump = Q[p].len - Q[q].len;
-    if (k < jump) {
-        return {q, k, a};
-    }
-    return follow_word(p, k - jump, pos + jump);
 }
 
 struct ImplicitState {
@@ -70,63 +42,97 @@ struct ImplicitState {
     operator bool () const {
         return q;
     }
-
-    ImplicitState follow_char(char b) const {
-        if (k == 0) {
-            if (!has_trans(q, b)) {
-                return {0};
-            }
-            int p = delta(q, b);
-            if (Q[p].len - Q[q].len == 1) {
-                return {p};
-            }
-            return {q, 1, b};
-        }
-        int p = delta(q, a);
-        if (word[Q[p].pos + Q[q].len + k] != b) {
-            return {0};
-        }
-        if (k == Q[p].len - Q[q].len - 1) {
-            return {p};
-        }
-        return {q, k+1, a};
-    }
-
-    ImplicitState get_s_link() const {
-        if (Q[q].len == 0) {
-            assert(k);
-            int p = delta(q, a);
-            int i = Q[p].pos + 1;
-            return follow_word(q, k-1, i);
-        } 
-        if (k == 0) {
-            return {Q[q].s_link};
-        }
-        int l = Q[q].s_link;
-        int p = delta(q, a);
-        int i = Q[p].pos + Q[q].len + 1;
-        return follow_word(l, k, i);
-    }
+    ImplicitState follow_char(char b) const;
+    ImplicitState get_s_link() const;
 };
 
-int qn = 1;
 int n = 0;
 char word[MAXN];
 
-ImplicitState stem;
+int get_len(int q) {
+    if (count_trans(q) == 0) {
+        //contains data about the first state along the path from its parent to q
+        //this state is for a string that is encountered once as a proper infix (if it's different from q)
+        //and possibly once as a suffix, therefore pos is correct for q
+        //q is a suffix
+        return n - Q[q].pos;
+    }
+    return Q[q].len;
+}
+
+//to be able to get s_link of leaves we need to store additionally parent of every node
+
+ImplicitState follow_word(int q, int k, int pos) { //assumes word is followable
+    if (k == 0) { // covers additional case for inner vertices
+        return {q};
+    }
+    char a = word[pos];
+    if (has_trans(q, a)) {
+        return {0};
+    }
+    int p = delta(q, a);
+    int jump = get_len(p) - Q[q].len;
+    if (k < jump) {
+        return {q, k, a};
+    }
+    return follow_word(p, k - jump, pos + jump);
+}
+
+ImplicitState ImplicitState::follow_char(char b) const {
+    if (k == 0) {
+        if (!has_trans(q, b)) {
+            return {0};
+        }
+        int p = delta(q, b);
+        if (Q[p].len - Q[q].len == 1) {
+            return {p};
+        }
+        return {q, 1, b};
+    }
+    int p = delta(q, a);
+    if (word[Q[p].pos + Q[q].len + k] != b) {
+        return {0};
+    }
+    if (k == Q[p].len - Q[q].len - 1) {
+        return {p};
+    }
+    return {q, k+1, a};
+}
+
+ImplicitState ImplicitState::get_s_link() const {
+    if (Q[q].len == 0) {
+        if (!k) {
+            return {0};
+        }
+        int p = delta(q, a);
+        int i = Q[p].pos + 1;
+        return follow_word(q, k-1, i);
+    } 
+    if (k == 0) {
+        return {Q[q].s_link};
+    }
+    int l = Q[q].s_link;
+    int p = delta(q, a);
+    int i = Q[p].pos + Q[q].len;
+    return follow_word(l, k, i);
+}
 
 string_view get_str(int q) {
     return {word + Q[q].pos, get_len(q)};
 }
 
+int qn = 1;
+ImplicitState stem;
+
+
 void add_char(char c) {
-    c -= 'a';
+    word[n++] = c;
 
     int prev_stem = 0;
-    while (stem && !follow_char(stem, c)) {
+    while (stem && !stem.follow_char(c)) {
         if (stem.k) { // make explicit state from implicit one
             int p = delta(stem.q, stem.a);
-            Q[qn] = {Q[p].pos, Q[q].len + stem.k}; // assign suffix link at next iteration
+            Q[qn] = {Q[p].pos, Q[stem.q].len + stem.k}; // assign suffix link at next iteration
             delta(stem.q, stem.a) = qn;
             char a = word[Q[qn].pos + Q[qn].len];
             delta(qn, a) = p;
@@ -149,17 +155,20 @@ void add_char(char c) {
     //then since stem was not a leaf and had a new transition added
     //therefore the current stem has that other transition as well apart from the transition with c
     //so the k of stem decreased during every iteration until it reached 0
+
     if (prev_stem) {
-        Q[prev_stem].s_link = stem;
+        Q[prev_stem].s_link = stem.q; 
+        // prev_stem might be newly created, otherwise its s_link is already the same, so OK
+        // if stem is null then prev_stem is empty word, so OK
     }
 
     if (!stem) {
         stem = {1};
+        //empty word is never a leaf
+    } else {
+        stem = stem.follow_char(c); 
+        // not a leaf because proper infix
     }
-
-
-    stem = ImplicitState{stem.q}.follow_char(c); // not a leaf because proper infix
-    word[n++] = c;
 }
 
 void init() {
@@ -169,11 +178,15 @@ void init() {
     Q[qn] = {-1, 0}; // only it can be encountered before start of word
     stem = {qn};
     qn++;
+    Q[qn] = {0, 1};
+    delta(qn-1, word[n++]) = qn;
+    qn++;
 }
 
 int main() {
     cin >> word;
     int n = strlen(word);
+    init();
     for (int i=0; i<n; ++i) {
         add_char(word[i]);
     }

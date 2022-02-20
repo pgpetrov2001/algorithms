@@ -12,7 +12,7 @@ class RMQ_const {
         const T (&arr)[MAXN];
         int parent[MAXN], left[MAXN], right[MAXN], root;
         int nodearr[MAX_WALK], deptharr[MAX_WALK], arridx = 0;
-        RMQ_1<T, MAX_WALK> *rmq;
+        optional<const RMQ_1<T, MAX_WALK>> rmq; // because it doesn't have default constructor
         int walk_idx[MAXN];
 
         void create_decarte_tree() {
@@ -62,10 +62,10 @@ class RMQ_const {
         RMQ_const(const T (&arr)[MAXN], int n) : arr(arr), n(n) {
             create_decarte_tree();
             euler_walk_tree(root);
-            rmq = new RMQ_1(deptharr, 2*n-1);
+            rmq.emplace(deptharr, 2*n-1);
         }
 
-        int query(int l, int r) {
+        int query(int l, int r) const {
             return nodearr[rmq->query(walk_idx[l], walk_idx[r])];
         }
 };

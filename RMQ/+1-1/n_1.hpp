@@ -2,12 +2,15 @@
 #define N_1_1
 
 #include <utility>
-using std::swap;
 #include <cassert>
 #include <cmath>
-using ::log2;
+#include <optional>
 
 #include "../nlogn_1.hpp"
+
+using std::swap;
+using ::log2;
+using std::optional;
 
 template<typename T, size_t MAXN>
 class RMQ_1 {
@@ -22,7 +25,7 @@ class RMQ_1 {
         int n, B;
         const T (&arr)[MAXN];
         T blocks[MAXN/MAXB];
-        RMQ<T, MAXN/MAXB> *blocks_rmq;
+        optional<const RMQ<T, MAXN/MAXB>> blocks_rmq; // because it doesn't have a default constructor
         int block_code[MAXN/MAXB];
         int tables[MAXCODES][MAXB][MAXB];
 
@@ -62,10 +65,10 @@ class RMQ_1 {
                     }
                 }
             }
-            blocks_rmq = new RMQ(blocks, n/B);
+            blocks_rmq.emplace(blocks, n/B);
         }
 
-        int query(int l, int r) {
+        int query(int l, int r) const {
             if (l > r) swap(l, r);
             if (l/B == r/B) 
                 return (l/B)*B + tables[block_code[l/B]][l%B][r%B];

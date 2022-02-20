@@ -2,9 +2,10 @@
 #define NLOGN_1
 
 #include <utility>
-using std::swap;
 #include <cassert>
 #include <cmath>
+
+using std::swap;
 using ::log2;
 
 template<typename T, size_t MAXN>
@@ -18,7 +19,7 @@ class RMQ {
         int pow_table[MAXLOGN];
 
     public:
-        int better(int ind1, int ind2) {
+        int better(int ind1, int ind2) const {
             return arr[ind1] < arr[ind2]? ind1: ind2;
         }
 
@@ -51,7 +52,7 @@ class RMQ {
             }
         }
 
-        int query(int l, int r) {
+        int query(int l, int r) const {
             if (l == r) return l;
             if (l > r) swap(l, r);
             int amt = log_table[r-l];

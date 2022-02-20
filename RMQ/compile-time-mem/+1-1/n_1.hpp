@@ -56,8 +56,8 @@ class RMQ_1 {
                     if (diff == -1) { // means 0
                         code <<= 1;
                     } else { // means 1
-                        ++code;
                         code <<= 1;
+                        ++code;
                     }
                     if ((i+1)%B == 0) { // at last element in block
                         block_code[i/B] = code;

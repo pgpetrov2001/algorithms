@@ -125,14 +125,22 @@ void precompute(const vector<string> &D) {
     curr_equiv_class_of[0] = 0;
     curr_equiv_classes[1-SIGMA%2][0].push_back(0); // error state
 
+    //create a minimization tree
+    //where each level k represents the equivalence classes on the k-th iteration
+    //from the standard automaton minimization algorithm, namely:
+    //2 classes are equivalent if they have the same right context for a length up to k-1
+    //each classes children are the equivalence classes that it splits into on the next iteration
     for (int l=1; l<=maxlen; ++l) {
         swap(prev_equiv_class_of, curr_equiv_class_of);
         swap(curr_equiv_classes[1], curr_equiv_classes[1-SIGMA%2]);
         swap(parent_class[1], parent_class[1-SIGMA%2]);
-        /* iota(parent_class[1].begin(), parent_class[1].end(), last_class+1); */
-        /* last_class += curr_equiv_classes[1-SIGMA%2].size(); */
 
+        //TODO: Optimize SIGMA*Pref(D) to O(log(SIGMA) + log(log(Pref(D)))) somehow with veb trees
+        //where l(D) = maxlen
+        //SIGMA is a hidden constant
         for (int c=0; c<SIGMA; ++c) {
+            //split the classes for each letter separately
+            //and then add the edges only for the end result
             curr_equiv_classes[c%2].clear();
             parent_class[c%2].clear();
             fill(new_class_from_old.begin(), new_class_from_old.end(), -1);
@@ -140,6 +148,7 @@ void precompute(const vector<string> &D) {
             assert(curr_equiv_classes[1-c%2].size());
             int first_class = 0; 
             int curr_class = 0;
+            //the nested for loops are O(Pref(D)) in total
             for (const auto &eq_class : curr_equiv_classes[1-c%2]) {
                 for (int v : eq_class) {
                     int u = delta[v][c];
@@ -159,6 +168,10 @@ void precompute(const vector<string> &D) {
             }
         }
 
+        //construct edges in tree, but keep it compressed, meaning:
+        //a downwards path of vertices, without branches is represented only by the lowest vertex
+        //that way the memory footprint of storing that tree is:
+        //O(|leaves|) instead of O(|leaves|*(tree height))
         stack<int> children;
         const auto add_children = [&](int prev_parent, int curr_parent) {
             if (prev_parent != curr_parent) {

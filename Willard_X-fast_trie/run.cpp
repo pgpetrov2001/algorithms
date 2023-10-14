@@ -2,6 +2,7 @@
 #include <vector>
 
 #include "XFastTrie.hpp"
+#include "YFastTrie.hpp"
 
 using std::cin;
 using std::cout;
@@ -18,7 +19,7 @@ int main() {
         cin >> S[i];
     }
 
-    XFastTrie<uint64_t, U> tree(S);
+    YFastTrie<uint64_t, U> tree(S);
 
     int q;
     cin >> q;
